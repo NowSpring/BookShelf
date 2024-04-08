@@ -1,0 +1,41 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:16.2
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+
+  fastapi:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend/api:/src
+    ports:
+      - 8000:8000
+    environment:
+      WATCHFILES_FORCE_POLLING: true
+    tty: true
+    depends_on:
+      - postgres
+
+  react:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend/trainpad:/src
+    tty: true
+    ports:
+      - 5173:5173
+    # command: sh -c "npm install && npm run dev"
+
+volumes:
+  postgres_data:
